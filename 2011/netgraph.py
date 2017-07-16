@@ -9,6 +9,7 @@ class Point:
         self.y = y
         self.is_platform = is_platform
         self.min = None
+        self.platform = None
 
     def get_distance(self, ano_point):
         return ((ano_point.x - self.x) ** 2 + (ano_point.y - self.y) ** 2) ** 0.5
@@ -18,9 +19,52 @@ class Graph:
     def __init__(self, matrix, vertex_list):
         self.matrix = matrix
         self.vertex_list = vertex_list
+        self.shortest()
 
-    def print_path(self):
-        pass
+    def shortest(self):
+        lenth = len(self.matrix)
+        for ii in range(0, lenth):
+            s = [ii + 1]
+            u = range(1, lenth + 1)
+            u.remove(ii + 1)
+            dist = [-1] * lenth
+            dist[ii] = 0
+            mymin = 1000000
+            minnum = None
+            for t in range(0, lenth):
+                if self.matrix[ii][t] <= 0:
+                    continue
+
+                dist[t] = self.matrix[ii][t]
+
+                if self.matrix[ii][t] < mymin:
+                    mymin = self.matrix[ii][t]
+                    minnum = t + 1
+            s.append(minnum)
+            u.remove(minnum)
+            dist[minnum - 1] = self.matrix[ii][minnum - 1]
+            while u:
+                mymin = 1000000
+                minnum_tem = -1
+                for j in range(0, lenth):
+                    if self.matrix[minnum - 1][j] <= 0 or (j + 1) in s:
+                        continue
+                    newdis = self.matrix[minnum - 1][j] + dist[minnum - 1]
+                    if newdis < dist[j] or dist[j] < 0:
+                        dist[j] = newdis
+                    if newdis < mymin:
+                        mymin = newdis
+                        minnum_tem = j + 1
+
+                for j in range(0, lenth):
+                    if 0 < dist[j] < mymin and (j + 1) in u:
+                        mymin = dist[j]
+                        minnum_tem = j + 1
+
+                minnum = minnum_tem
+                u.remove(minnum_tem)
+                s.append(minnum_tem)
+            print dist
 
 
 # 数据初始化
@@ -59,8 +103,11 @@ for _x, _y in zip(a_x, a_y):
 
 # 邻接矩阵初始化  92*92
 _matrix = []
+for _ in range(0, 92):
+    _matrix.append([-1] * 92)
 for i in range(0, 92):
-    _matrix.append([0] * 92)
+    _matrix[i][i] = 0
+
 # 建立边信息
 for _f, _t in zip(path_from, path_to):
     if _t > 92:
