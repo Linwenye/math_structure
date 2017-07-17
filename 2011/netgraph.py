@@ -1,5 +1,6 @@
 # encoding=utf-8
 """最短寻路"""
+import json
 
 
 class Point:
@@ -19,6 +20,7 @@ class Graph:
     def __init__(self, matrix, vertex_list):
         self.matrix = matrix
         self.vertex_list = vertex_list
+        self.shortest_path = []
         self.shortest()
 
     def shortest(self):
@@ -31,6 +33,8 @@ class Graph:
             dist[ii] = 0
             mymin = 1000000
             minnum = None
+
+            # 直接连接的点
             for t in range(0, lenth):
                 if self.matrix[ii][t] <= 0:
                     continue
@@ -43,6 +47,8 @@ class Graph:
             s.append(minnum)
             u.remove(minnum)
             dist[minnum - 1] = self.matrix[ii][minnum - 1]
+
+            # 间接连接
             while u:
                 mymin = 1000000
                 minnum_tem = -1
@@ -64,7 +70,8 @@ class Graph:
                 minnum = minnum_tem
                 u.remove(minnum_tem)
                 s.append(minnum_tem)
-            print dist
+
+            self.shortest_path.append(dist)
 
 
 # 数据初始化
@@ -118,3 +125,44 @@ for _f, _t in zip(path_from, path_to):
         _matrix[_t - 1][_f - 1] = distance
 
 graph = Graph(_matrix, _vertex_list)
+# print graph.shortest_path
+
+res_dict = dict()
+for j in range(1, 21):
+    res_dict['平台' + str(j)] = []
+
+for _f, _t in zip(path_from, path_to):
+    if _t > 92:
+        continue
+    else:
+        shortest1 = 1000000
+        short_num1 = -1
+        shortest2 = 1000000
+        short_num2 = -1
+        for pp in range(0, 20):
+            if graph.shortest_path[_f - 1][pp] < shortest1:
+                shortest1 = graph.shortest_path[_f - 1][pp]
+                short_num1 = pp + 1
+            if graph.shortest_path[_t - 1][pp] < shortest2:
+                shortest2 = graph.shortest_path[_t - 1][pp]
+                short_num2 = pp + 1
+
+    _distance = _vertex_list[_f - 1].get_distance(_vertex_list[_t - 1])
+    pre_dis = round(((shortest1 + shortest2 + _distance) / 2 - shortest1) * 100, 2)
+    bac_dis = round(_distance * 100 - pre_dis, 2)
+
+    if short_num1 == short_num2:
+        res_dict['平台' + str(short_num1)].append('节点{} 到节点{}'.format(_f, _t))
+        # print '节点{} 到节点{} 由平台{}管理'.format(_f, _t, short_num1)
+
+    elif a_x[_f - 1] < a_x[_t - 1]:
+        res_dict['平台' + str(short_num1)].append('节点{}到节点{}前{}米'.format(_f, _t, pre_dis))
+        res_dict['平台' + str(short_num2)].append('节点{}到节点{}后{}米'.format(_f, _t, bac_dis))
+        # print '节点{} 到节点{} 前{} 米由平台{}管理，后{} 米由平台{}管理'.format(_f, _t, pre_dis, short_num1, bac_dis, short_num2)
+    else:
+        res_dict['平台' + str(short_num1)].append('节点{}到节点{}前{}米'.format(_f, _t, pre_dis))
+        res_dict['平台' + str(short_num2)].append('节点{}到节点{}后{}米'.format(_f, _t, bac_dis))
+        # print '节点{} 到节点{} 前{} 米由平台{}管理，后{} 米由平台{}管理'.format(_f, _t, bac_dis, short_num2, pre_dis, short_num1)
+
+print json.dumps(sorted([e for e in res_dict.items()]), encoding="UTF-8", ensure_ascii=False)
+print json.dumps(res_dict, encoding="UTF-8", ensure_ascii=False)
