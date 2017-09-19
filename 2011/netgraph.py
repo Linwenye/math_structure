@@ -128,9 +128,10 @@ graph = Graph(_matrix, _vertex_list)
 # print graph.shortest_path
 
 res_dict = dict()
-for j in range(1, 21):
-    res_dict['平台' + str(j)] = []
+for _j in range(1, 21):
+    res_dict['平台' + str(_j)] = []
 
+longest_res = []
 for _f, _t in zip(path_from, path_to):
     if _t > 92:
         continue
@@ -148,7 +149,9 @@ for _f, _t in zip(path_from, path_to):
                 short_num2 = pp + 1
 
     _distance = _vertex_list[_f - 1].get_distance(_vertex_list[_t - 1])
-    pre_dis = round(((shortest1 + shortest2 + _distance) / 2 - shortest1) * 100, 2)
+    sum_distance = round((shortest1 + shortest2 + _distance) / 2 * 100, 2)
+    # longest_res.append((sum_distance, (a_x[_f - 1] + a_x[_t - 1]) / 2, (a_y[_f - 1] + a_y[_t - 1]) / 2))
+    pre_dis = round((sum_distance - shortest1) * 100, 2)
     bac_dis = round(_distance * 100 - pre_dis, 2)
 
     if short_num1 == short_num2:
@@ -164,5 +167,11 @@ for _f, _t in zip(path_from, path_to):
         res_dict['平台' + str(short_num2)].append('节点{}到节点{}后{}米'.format(_f, _t, bac_dis))
         # print '节点{} 到节点{} 前{} 米由平台{}管理，后{} 米由平台{}管理'.format(_f, _t, bac_dis, short_num2, pre_dis, short_num1)
 
-print json.dumps(sorted([e for e in res_dict.items()]), encoding="UTF-8", ensure_ascii=False)
-print json.dumps(res_dict, encoding="UTF-8", ensure_ascii=False)
+    if _f == 3 and _t == 45:
+        print short_num1, shortest1
+        print short_num2, shortest2
+        print _distance*100
+        print
+print sorted(longest_res)
+# print json.dumps(sorted([e for e in res_dict.items()]), encoding="UTF-8", ensure_ascii=False)
+# print json.dumps(res_dict, encoding="UTF-8", ensure_ascii=False)
